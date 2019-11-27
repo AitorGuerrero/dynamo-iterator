@@ -1,3 +1,5 @@
 .idea
 test.*
 *.ts
+^*.d.ts
+.nyc_output
