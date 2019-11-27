@@ -1,10 +1,33 @@
 {
   "name": "dynamo-iterator",
   "version": "1.0.0",
-  "description": "Iterator pattern applied to AWS Dyname searches",
+  "description": "Iterator pattern applied to AWS Dynamo searches",
   "main": "index.js",
   "repository": "git@github.com:AitorGuerrero/dynamo-iterator.git",
   "author": "Aitor Guerrero <aitgud.dev@gmail.com>",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "scripts": {
+    "build": "tsc",
+    "check:style": "tslint -p .",
+    "check:builds": "tsc --noEmit",
+    "preversion": "yarn run build"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.5",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.12.14",
+    "aws-sdk": "^2.580.0",
+    "chai": "^4.2.0",
+    "husky": "^3.1.0",
+    "mocha": "^6.2.2",
+    "nyc": "^14.1.1",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn && yarn run check:style && yarn run check:builds"
+    }
+  }
 }

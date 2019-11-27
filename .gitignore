@@ -1,2 +1,9 @@
 # IDE
 .idea
+
+# Dependencies
+node_modules
+
+# Generated
+*.js
+*.d.ts
