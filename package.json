@@ -8,10 +8,12 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "test": "mocha",
     "build": "tsc",
     "check:style": "tslint -p .",
     "check:builds": "tsc --noEmit",
-    "preversion": "yarn run build"
+    "preversion": "yarn run build",
+    "coverage": "nyc yarn run test"
   },
   "devDependencies": {
     "@types/chai": "^4.2.5",
@@ -29,5 +31,10 @@
     "hooks": {
       "pre-commit": "yarn && yarn run check:style && yarn run check:builds"
     }
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "check-coverage": true
   }
 }
