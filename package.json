@@ -13,7 +13,7 @@
     "check:style": "tslint -p .",
     "check:builds": "tsc --noEmit",
     "preversion": "yarn run build && yarn run coverage",
-    "coverage": "nyc yarn test"
+    "coverage": "nyc mocha"
   },
   "devDependencies": {
     "@types/chai": "^4.2.5",
