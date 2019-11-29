@@ -20,15 +20,11 @@ describe("Having a iterator document client", () => {
 		const item0Id = "item0Id";
 		const item1Id = "item1Id";
 		const item5Id = "item5Id";
-		beforeEach(() => {
-			fakeDocumentClient.queueBatches = [
-				{Items: [{id: item0Id}, {id: item1Id}]},
-				{Items: [{id: "item3"}, {id: "item4"}, {id: item5Id}]},
-			];
-		});
+		beforeEach(() => fakeDocumentClient.list
+			= [{id: item0Id}, {id: item1Id}, {id: "item3"}, {id: "item4"}, {id: item5Id}]);
 		describe("and asking to scan", () => {
 			let iterator: ScanIterator;
-			beforeEach(() => iterator = iteratorDocumentClient.scan({TableName: "tableName"}));
+			beforeEach(async () => iterator = await iteratorDocumentClient.scan({TableName: "tableName"}));
 			describe("and iterating the response", () => {
 				let items: DocumentClient.AttributeMap[];
 				beforeEach(async () => {
@@ -96,7 +92,7 @@ describe("Having a iterator document client", () => {
 		});
 		describe("and asking to query", () => {
 			let iterator: QueryIterator;
-			beforeEach(() => iterator = iteratorDocumentClient.query({TableName: "tableName"}));
+			beforeEach(async () => iterator = await iteratorDocumentClient.query({TableName: "tableName"}));
 			describe("and iterating the response", () => {
 				let items: DocumentClient.AttributeMap[];
 				beforeEach(async () => {
@@ -106,6 +102,18 @@ describe("Having a iterator document client", () => {
 					}
 				});
 				it("should iterate all items", async () => expect(items).to.be.length(5));
+			});
+		});
+		describe("and there are no items in the collection", () => {
+			beforeEach(() => fakeDocumentClient.list = []);
+			describe("and asking to query", () => {
+				let iterator: QueryIterator;
+				beforeEach(async () => iterator = await iteratorDocumentClient.query({TableName: "tableName"}));
+				it("should no iterate", async () => {
+					for (const item of iterator) {
+						expect.fail("should not iterate");
+					}
+				});
 			});
 		});
 	});

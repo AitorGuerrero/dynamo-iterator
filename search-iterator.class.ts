@@ -14,7 +14,6 @@ interface IOutput {
 export default abstract class <Input> {
 
 	private batch: DocumentClient.AttributeMap[] = [];
-	private done: boolean = false;
 
 	private sourceIsEmpty = false;
 	private lastEvaluatedKey: DocumentClient.Key;
@@ -28,8 +27,13 @@ export default abstract class <Input> {
 		return this;
 	}
 
+	public async preload() {
+		this.processing = true;
+		await this.fillBatch();
+		this.processing = false;
+	}
+
 	public next() {
-		const done = this.done;
 		if (this.processing) {
 			throw new Error("processing");
 		}
@@ -37,7 +41,7 @@ export default abstract class <Input> {
 		const nextPromise = this.nextAsync();
 		nextPromise.then(() => this.processing = false);
 
-		return {done, value: nextPromise};
+		return {done: this.isDone(), value: nextPromise};
 	}
 
 	public async count() {
@@ -82,17 +86,16 @@ export default abstract class <Input> {
 
 	private async nextAsync() {
 		while (this.batch.length === 0 && this.sourceIsEmpty === false) {
-			const dynamoResponse = await this.getNextBlock();
-			this.batch = dynamoResponse.Items;
-			this.sourceIsEmpty = dynamoResponse.LastEvaluatedKey === undefined;
+			await this.fillBatch();
 		}
-		if (this.batch.length === 0) {
-			return;
-		}
-		const next = this.batch.shift();
-		this.done = this.isDone();
 
-		return next;
+		return this.batch.shift();
+	}
+
+	private async fillBatch() {
+		const dynamoResponse = await this.getNextBlock();
+		this.batch = dynamoResponse.Items;
+		this.sourceIsEmpty = dynamoResponse.LastEvaluatedKey === undefined;
 	}
 
 	private isDone() {

@@ -8,11 +8,17 @@ export default class {
 		private documentClient: DocumentClient,
 	) {}
 
-	public scan(input: DocumentClient.ScanInput) {
-		return new ScanIterator(this.documentClient, input);
+	public async scan(input: DocumentClient.ScanInput) {
+		const iterator = new ScanIterator(this.documentClient, input);
+		await iterator.preload();
+
+		return iterator;
 	}
 
-	public query(input: DocumentClient.QueryInput) {
-		return new QueryIterator(this.documentClient, input);
+	public async query(input: DocumentClient.QueryInput) {
+		const iterator = new QueryIterator(this.documentClient, input);
+		await iterator.preload();
+
+		return iterator;
 	}
 }
