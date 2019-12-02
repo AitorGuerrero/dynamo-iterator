@@ -38,10 +38,13 @@ export default abstract class <Input> {
 			throw new Error("processing");
 		}
 		this.processing = true;
+		if (this.isDone()) {
+			return {done: true, value: null};
+		}
 		const nextPromise = this.nextAsync();
 		nextPromise.then(() => this.processing = false);
 
-		return {done: this.isDone(), value: nextPromise};
+		return {done: false, value: nextPromise};
 	}
 
 	public async count() {

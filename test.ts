@@ -16,7 +16,26 @@ describe("Having a iterator document client", () => {
 		iteratorDocumentClient = new IteratorDocumentClient(fakeDocumentClient as any as DocumentClient);
 	});
 
-	describe("and document client having 2 batches of items", () => {
+	describe("and document client having 4 items", () => {
+		beforeEach(() => fakeDocumentClient.list
+			= [{id: "item1"}, {id: "item2"}, {id: "item3"}, {id: "item4"}]);
+		describe("and asking to scan", () => {
+			let iterator: ScanIterator;
+			beforeEach(async () => iterator = await iteratorDocumentClient.scan({TableName: "tableName"}));
+			describe("and iterating the response", () => {
+				let items: DocumentClient.AttributeMap[];
+				beforeEach(async () => {
+					items = [];
+					for (const item of iterator) {
+						items.push(await item);
+					}
+				});
+				it("should iterate all items", async () => expect(items).to.be.length(4));
+			});
+		});
+	});
+
+	describe("and document client having 5 of items", () => {
 		const item0Id = "item0Id";
 		const item1Id = "item1Id";
 		const item5Id = "item5Id";

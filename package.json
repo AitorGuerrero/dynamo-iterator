@@ -12,7 +12,7 @@
     "build": "tsc",
     "check:style": "tslint -p .",
     "check:builds": "tsc --noEmit",
-    "preversion": "yarn run build && yarn run coverage",
+    "preversion": "yarn build && yarn coverage",
     "coverage": "nyc mocha"
   },
   "devDependencies": {
@@ -29,7 +29,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn && yarn run check:style && yarn run check:builds && yarn test"
+      "pre-commit": "yarn && yarn run check:style && yarn run check:builds && yarn coverage"
     }
   },
   "nyc": {
