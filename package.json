@@ -1,6 +1,6 @@
 {
   "name": "dynamo-iterator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Iterator pattern applied to AWS Dynamo searches",
   "main": "index.js",
   "repository": "git@github.com:AitorGuerrero/dynamo-iterator.git",
