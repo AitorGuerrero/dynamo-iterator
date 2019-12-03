@@ -18,6 +18,7 @@ export default abstract class <Input> {
 	private sourceIsEmpty = false;
 	private lastEvaluatedKey: DocumentClient.Key;
 	private processing: boolean = false;
+	private nextItem: DocumentClient.AttributeMap;
 
 	protected constructor(
 		protected input: Input & IInput,
@@ -30,6 +31,7 @@ export default abstract class <Input> {
 	public async preload() {
 		this.processing = true;
 		await this.fillBatch();
+		this.nextItem = this.batch.shift();
 		this.processing = false;
 	}
 
@@ -88,21 +90,23 @@ export default abstract class <Input> {
 	protected abstract asyncSearch(input: Input): Promise<IOutput>;
 
 	private async nextAsync() {
-		while (this.batch.length === 0 && this.sourceIsEmpty === false) {
-			await this.fillBatch();
-		}
+		await this.fillBatch();
+		const currentItem = this.nextItem;
+		this.nextItem = this.batch.shift();
 
-		return this.batch.shift();
+		return currentItem;
 	}
 
 	private async fillBatch() {
-		const dynamoResponse = await this.getNextBlock();
-		this.batch = dynamoResponse.Items;
-		this.sourceIsEmpty = dynamoResponse.LastEvaluatedKey === undefined;
+		while (this.batch.length === 0 && this.sourceIsEmpty === false) {
+			const dynamoResponse = await this.getNextBlock();
+			this.batch = dynamoResponse.Items;
+			this.sourceIsEmpty = dynamoResponse.LastEvaluatedKey === undefined;
+		}
 	}
 
 	private isDone() {
-		return this.sourceIsEmpty && this.batch.length === 0;
+		return this.sourceIsEmpty && this.nextItem === undefined;
 	}
 
 	private async getNextBlock() {

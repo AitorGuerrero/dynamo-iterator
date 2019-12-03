@@ -9,7 +9,7 @@ import DocumentClient = DynamoDB.DocumentClient;
 export default class {
 
     public batchesSize = 2;
-    public list: DynamoDB.DocumentClient.ItemList = [];
+    public list: Array<{matches?: boolean, value: DocumentClient.AttributeMap}> = [];
 
     public scan(i: DocumentClient.ScanInput, cb: (err: Error, data: DocumentClient.ScanOutput) => unknown) {
         cb(null, this.getNexResponse(i));
@@ -22,8 +22,8 @@ export default class {
     private getNexResponse(i: DocumentClient.ScanInput | DocumentClient.QueryInput) {
         const firstIndex = i.ExclusiveStartKey ? this.findIndexOfKey(i.ExclusiveStartKey) + 1 : 0;
         const lastIndex = firstIndex + this.batchesSize;
-        const batch = this.list.slice(firstIndex, lastIndex);
-        const lastEvaluatedKey = lastIndex >= this.list.length ? undefined : batch[batch.length - 1];
+        const batch = this.list.slice(firstIndex, lastIndex).filter((i) => i.matches !== false).map((i) => i.value);
+        const lastEvaluatedKey = lastIndex >= this.list.length ? undefined : this.list[lastIndex - 1].value;
         if (i.Select && i.Select === 'COUNT') {
             return {
                 Count: batch.length,
@@ -38,7 +38,7 @@ export default class {
     }
 
     private findIndexOfKey(key: DocumentClient.Key) {
-        return this.list.findIndex((i) => this.keyMatches(i, key));
+        return this.list.findIndex((i) => this.keyMatches(i.value, key));
     }
 
     private keyMatches(item: DocumentClient.AttributeMap, key: DocumentClient.Key) {

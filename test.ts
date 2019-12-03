@@ -22,7 +22,7 @@ describe("Having a iterator document client", () => {
 
 		beforeEach(() => {
 			for (let i = 0; i < itemsAmount; i++) {
-				fakeDocumentClient.list.push({id: buildId(i)});
+				fakeDocumentClient.list.push({value: buildItem(i)});
 			}
 		});
 		describe("and asking to scan", () => {
@@ -46,13 +46,13 @@ describe("Having a iterator document client", () => {
 		});
 	});
 
-	describe("and document client having 5 of items", () => {
+	describe("and document client having 5 items", () => {
 
 		const itemsAmount = 5;
 
 		beforeEach(() => {
 			for (let i = 0; i < itemsAmount; i++) {
-				fakeDocumentClient.list.push({id: buildId(i)});
+				fakeDocumentClient.list.push({value: buildItem(i)});
 			}
 		});
 		describe("and asking to scan", () => {
@@ -159,7 +159,60 @@ describe("Having a iterator document client", () => {
 			beforeEach(async () => countResult = await iteratorDocumentClient.countScan({TableName: "tableName"}));
 			it("should return document client items amount", () => expect(countResult).to.be.eq(5));
 		});
+		describe("and last items batch is empty", () => {
+			beforeEach(() => fakeDocumentClient.list.push(
+				{value: buildItem(5), matches: false},
+				{value: buildItem(6), matches: false},
+				{value: buildItem(7), matches: false},
+			));
+			describe("and asking to scan", () => {
+				let iterator: ScanIterator;
+				beforeEach(async () => iterator = await iteratorDocumentClient.scan({TableName: "tableName"}));
+				describe("and iterating the response", () => {
+					let items: DocumentClient.AttributeMap[] = [];
+					beforeEach(async () => {
+						items = [];
+						for (const item of iterator) {
+							items.push(await item);
+						}
+					});
+					it("should iterate all items", async () => {
+						expect(items).to.be.length(itemsAmount);
+					});
+				});
+			});
+		});
+		describe("and middle items batch is empty", () => {
+			beforeEach(() => fakeDocumentClient.list = [
+				{value: buildItem(0)},
+				{value: buildItem(1)},
+				{value: buildItem(2), matches: false},
+				{value: buildItem(3), matches: false},
+				{value: buildItem(4), matches: false},
+				{value: buildItem(5)},
+			]);
+			describe("and asking to scan", () => {
+				let iterator: ScanIterator;
+				beforeEach(async () => iterator = await iteratorDocumentClient.scan({TableName: "tableName"}));
+				describe("and iterating the response", () => {
+					let items: DocumentClient.AttributeMap[] = [];
+					beforeEach(async () => {
+						items = [];
+						for (const item of iterator) {
+							items.push(await item);
+						}
+					});
+					it("should iterate all items", async () => {
+						expect(items).to.be.length(3);
+					});
+				});
+			});
+		});
 	});
+
+	function buildItem(i: number) {
+		return {id: buildId(i)};
+	}
 
 	function buildId(i: number) {
 		return `item${i}Id`;
