@@ -21,4 +21,12 @@ export default class {
 
 		return iterator;
 	}
+
+	public async countQuery(input: DocumentClient.QueryInput) {
+		return (new QueryIterator(this.documentClient, input)).count();
+	}
+
+	public async countScan(input: DocumentClient.ScanInput) {
+		return (new ScanIterator(this.documentClient, input)).count();
+	}
 }
