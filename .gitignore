@@ -6,5 +6,7 @@ node_modules
 
 # Generated
 *.js
+*.ts.map
+*.js.map
 *.d.ts
 .nyc_output

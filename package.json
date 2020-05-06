@@ -9,9 +9,9 @@
   "private": false,
   "scripts": {
     "test": "mocha",
+    "test:coverage": "nyc mocha",
     "build": "tsc",
     "check:style": "tslint -p .",
-    "check:builds": "tsc --noEmit",
     "preversion": "yarn build"
   },
   "devDependencies": {
@@ -23,12 +23,14 @@
     "husky": "^4.2.5",
     "mocha": "^7.1.2",
     "nyc": "^15.0.1",
+    "source-map-support": "^0.5.19",
+    "ts-node": "^8.10.1",
     "tslint": "^5.20.1",
     "typescript": "^3.7.2"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn && yarn run check:style && yarn run check:builds"
+      "pre-commit": "yarn install && yarn check:style && yarn build && yarn test:coverage"
     }
   }
 }
