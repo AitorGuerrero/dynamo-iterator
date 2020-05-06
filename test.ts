@@ -1,3 +1,4 @@
+/* tslint:disable:no-unused-expression */
 import {DocumentClient} from "aws-sdk/clients/dynamodb";
 import {expect} from "chai";
 import {beforeEach, describe, it} from "mocha";
@@ -109,6 +110,30 @@ describe("Having a iterator document client", () => {
 				let sliced: DocumentClient.AttributeMap[];
 				beforeEach(async () => sliced = await iterator.slice(askedAmount));
 				it("should return the asked amount", () => expect(sliced).to.be.length(askedAmount));
+				describe("and asking for the 5th item", () => {
+					let itemResult: any;
+					beforeEach(() => itemResult = iterator.next());
+					it("should return undefined", async () => {
+						expect(itemResult.done).to.be.equal(false);
+						const item = await itemResult.value;
+						expect(item.id).to.be.equal("item4Id");
+					});
+				});
+			});
+			describe("and asking to slice more than available", () => {
+				const askedAmount = itemsAmount + 5;
+				let sliced: DocumentClient.AttributeMap[];
+				beforeEach(async () => sliced = await iterator.slice(askedAmount));
+				it("should return available amount", () => expect(sliced).to.be.length(itemsAmount));
+				describe("and asking for the next item", () => {
+					let itemResult: any;
+					beforeEach(() => itemResult = iterator.next());
+					it("should return undefined", async () => {
+						expect(itemResult.done).to.be.equal(true);
+						const item = await itemResult.value;
+						expect(item).to.be.null;
+					});
+				});
 			});
 			describe("and iterating without awaiting to the result", () => {
 				let thrownError: Error;

@@ -41,6 +41,7 @@ export default abstract class <Input> {
 		}
 		this.processing = true;
 		if (this.isDone()) {
+			this.processing = false;
 			return {done: true, value: null};
 		}
 		const nextPromise = this.nextAsync();
