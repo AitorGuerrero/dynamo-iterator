@@ -4,7 +4,7 @@ import SearchIterator from "./search-iterator.class";
 import DocumentClient = DynamoDB.DocumentClient;
 
 export interface IScanDocumentClient {
-	scan(i: DocumentClient.ScanInput, cb: (err: Error, data: DocumentClient.ScanOutput) => unknown): unknown;
+	scan(i: DocumentClient.ScanInput): {promise: () => Promise<DocumentClient.ScanOutput>};
 }
 
 export default class extends SearchIterator<DocumentClient.ScanInput> {
@@ -17,8 +17,6 @@ export default class extends SearchIterator<DocumentClient.ScanInput> {
 	}
 
 	protected asyncSearch(input: DocumentClient.ScanInput) {
-		return new Promise<DocumentClient.ScanOutput>(
-			(rs, rj) => this.documentClient.scan(input, (err, res) => err ? rj(err) : rs(res)),
-		);
+		return this.documentClient.scan(input).promise();
 	}
 }

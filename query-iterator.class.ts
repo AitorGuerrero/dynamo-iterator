@@ -4,7 +4,7 @@ import SearchGenerator from "./search-iterator.class";
 import DocumentClient = DynamoDB.DocumentClient;
 
 export interface IQueryDocumentClient {
-	query(i: DocumentClient.QueryInput, cb: (err: Error, data: DocumentClient.QueryOutput) => unknown): unknown;
+	query(i: DocumentClient.QueryInput): {promise: () => Promise<DocumentClient.QueryOutput>};
 }
 
 export default class extends SearchGenerator<DocumentClient.QueryInput> {
@@ -17,8 +17,6 @@ export default class extends SearchGenerator<DocumentClient.QueryInput> {
 	}
 
 	protected asyncSearch(input: DocumentClient.QueryInput) {
-		return new Promise<DocumentClient.QueryOutput>(
-			(rs, rj) => this.documentClient.query(input, (err, res) => err ? rj(err) : rs(res)),
-		);
+		return this.documentClient.query(input).promise();
 	}
 }

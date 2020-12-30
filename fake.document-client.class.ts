@@ -11,12 +11,16 @@ export default class {
     public batchesSize = 2;
     public list: Array<{matches?: boolean, value: DocumentClient.AttributeMap}> = [];
 
-    public scan(i: DocumentClient.ScanInput, cb: (err: Error, data: DocumentClient.ScanOutput) => unknown) {
-        cb(null, this.getNexResponse(i));
+    public scan(i: DocumentClient.ScanInput) {
+        return {
+            promise: async () => this.getNexResponse(i),
+        };
     }
 
-    public query(i: DocumentClient.QueryInput, cb: (err: Error, data: DocumentClient.QueryOutput) => unknown) {
-        cb(null, this.getNexResponse(i));
+    public query(i: DocumentClient.QueryInput) {
+        return {
+            promise: async () => this.getNexResponse(i),
+        };
     }
 
     private getNexResponse(i: DocumentClient.ScanInput | DocumentClient.QueryInput) {
