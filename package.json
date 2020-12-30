@@ -12,7 +12,7 @@
     "test:coverage": "nyc mocha",
     "build": "tsc",
     "check:style": "tslint -p .",
-    "preversion": "yarn build"
+    "preversion": "yarn build && yarn test:coverage"
   },
   "devDependencies": {
     "@types/chai": "^4.2.5",
