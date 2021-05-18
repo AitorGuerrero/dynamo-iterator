@@ -33,8 +33,8 @@ describe("Having a iterator document client", () => {
 				let items: DocumentClient.AttributeMap[] = [];
 				beforeEach(async () => {
 					items = [];
-					for (const item of iterator) {
-						items.push(await item);
+					for await (const item of iterator) {
+						items.push(item);
 					}
 				});
 				it("should iterate all items", async () => expect(items).to.be.length(itemsAmount));
@@ -63,8 +63,8 @@ describe("Having a iterator document client", () => {
 				let items: DocumentClient.AttributeMap[] = [];
 				beforeEach(async () => {
 					items = [];
-					for (const item of iterator) {
-						items.push(await item);
+					for await (const item of iterator) {
+						items.push(item);
 					}
 				});
 				it("should iterate all items", async () => expect(items).to.be.length(itemsAmount));
@@ -155,8 +155,8 @@ describe("Having a iterator document client", () => {
 				let items: DocumentClient.AttributeMap[];
 				beforeEach(async () => {
 					items = [];
-					for (const item of iterator) {
-						items.push(await item);
+					for await (const item of iterator) {
+						items.push(item);
 					}
 				});
 				it("should iterate all items", async () => expect(items).to.be.length(5));
@@ -197,8 +197,8 @@ describe("Having a iterator document client", () => {
 					let items: DocumentClient.AttributeMap[] = [];
 					beforeEach(async () => {
 						items = [];
-						for (const item of iterator) {
-							items.push(await item);
+						for await (const item of iterator) {
+							items.push(item);
 						}
 					});
 					it("should iterate all items", async () => {
@@ -223,8 +223,8 @@ describe("Having a iterator document client", () => {
 					let items: DocumentClient.AttributeMap[] = [];
 					beforeEach(async () => {
 						items = [];
-						for (const item of iterator) {
-							items.push(await item);
+						for await (const item of iterator) {
+							items.push(item);
 						}
 					});
 					it("should iterate all items", async () => {
