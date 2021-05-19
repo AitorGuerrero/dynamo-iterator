@@ -1,20 +1,21 @@
 /* tslint:disable:no-unused-expression */
+import {DynamoDB} from "aws-sdk";
 import {DocumentClient} from "aws-sdk/clients/dynamodb";
 import {expect} from "chai";
 import {beforeEach, describe, it} from "mocha";
-import IteratorDocumentClient from ".";
+import DynamoIteratorFactory from "./dynamo-iterator.factory";
 import FakeDocumentClient from "./fake.document-client.class";
 import QueryIterator from "./query-iterator.class";
 import ScanIterator from "./scan-iterator.class";
 
 describe("Having a iterator document client", () => {
 
-	let iteratorDocumentClient: IteratorDocumentClient;
+	let dynamoIteratorFactory: DynamoIteratorFactory;
 	let fakeDocumentClient: FakeDocumentClient;
 
 	beforeEach(() => {
 		fakeDocumentClient = new FakeDocumentClient();
-		iteratorDocumentClient = new IteratorDocumentClient(fakeDocumentClient as any as DocumentClient);
+		dynamoIteratorFactory = new DynamoIteratorFactory(fakeDocumentClient as any as DocumentClient);
 	});
 
 	describe("and document client having 4 items", () => {
@@ -28,12 +29,12 @@ describe("Having a iterator document client", () => {
 		});
 		describe("and asking to scan", () => {
 			let iterator: ScanIterator;
-			beforeEach(async () => iterator = await iteratorDocumentClient.scan({TableName: "tableName"}));
+			beforeEach(async () => iterator = dynamoIteratorFactory.scan({TableName: "tableName"}));
 			describe("and iterating the response", () => {
 				let items: DocumentClient.AttributeMap[] = [];
 				beforeEach(async () => {
 					items = [];
-					for await (const item of iterator) {
+					for await (const item of iterator as any) {
 						items.push(item);
 					}
 				});
@@ -58,7 +59,7 @@ describe("Having a iterator document client", () => {
 		});
 		describe("and asking to scan", () => {
 			let iterator: ScanIterator;
-			beforeEach(async () => iterator = await iteratorDocumentClient.scan({TableName: "tableName"}));
+			beforeEach(async () => iterator = dynamoIteratorFactory.scan({TableName: "tableName"}));
 			describe("and iterating the response", () => {
 				let items: DocumentClient.AttributeMap[] = [];
 				beforeEach(async () => {
@@ -79,7 +80,7 @@ describe("Having a iterator document client", () => {
 				beforeEach(async () => {
 					items = [];
 					let item: DocumentClient.AttributeMap;
-					while (item = await iterator.next().value) {
+					while (item = (await iterator.next()).value) {
 						items.push(item);
 					}
 				});
@@ -111,11 +112,11 @@ describe("Having a iterator document client", () => {
 				beforeEach(async () => sliced = await iterator.slice(askedAmount));
 				it("should return the asked amount", () => expect(sliced).to.be.length(askedAmount));
 				describe("and asking for the 5th item", () => {
-					let itemResult: any;
-					beforeEach(() => itemResult = iterator.next());
+					let itemResult: {done: boolean, value: DynamoDB.DocumentClient.AttributeMap};
+					beforeEach(async () => itemResult = await iterator.next());
 					it("should return undefined", async () => {
 						expect(itemResult.done).to.be.equal(false);
-						const item = await itemResult.value;
+						const item = itemResult.value;
 						expect(item.id).to.be.equal("item4Id");
 					});
 				});
@@ -126,21 +127,21 @@ describe("Having a iterator document client", () => {
 				beforeEach(async () => sliced = await iterator.slice(askedAmount));
 				it("should return available amount", () => expect(sliced).to.be.length(itemsAmount));
 				describe("and asking for the next item", () => {
-					let itemResult: any;
-					beforeEach(() => itemResult = iterator.next());
+					let itemResult: {done: boolean, value: DynamoDB.DocumentClient.AttributeMap};
+					beforeEach(async () => itemResult = await iterator.next());
 					it("should return undefined", async () => {
 						expect(itemResult.done).to.be.equal(true);
-						const item = await itemResult.value;
-						expect(item).to.be.null;
+						const item = itemResult.value;
+						expect(item).to.be.undefined;
 					});
 				});
 			});
 			describe("and iterating without awaiting to the result", () => {
 				let thrownError: Error;
-				beforeEach(() => {
+				beforeEach(async () => {
 					try {
 						iterator.next();
-						iterator.next();
+						await iterator.next();
 					} catch (err) {
 						thrownError = err;
 					}
@@ -150,7 +151,7 @@ describe("Having a iterator document client", () => {
 		});
 		describe("and asking to query", () => {
 			let iterator: QueryIterator;
-			beforeEach(async () => iterator = await iteratorDocumentClient.query({TableName: "tableName"}));
+			beforeEach(async () => iterator = dynamoIteratorFactory.query({TableName: "tableName"}));
 			describe("and iterating the response", () => {
 				let items: DocumentClient.AttributeMap[];
 				beforeEach(async () => {
@@ -166,9 +167,9 @@ describe("Having a iterator document client", () => {
 			beforeEach(() => fakeDocumentClient.list = []);
 			describe("and asking to query", () => {
 				let iterator: QueryIterator;
-				beforeEach(async () => iterator = await iteratorDocumentClient.query({TableName: "tableName"}));
+				beforeEach(async () => iterator = dynamoIteratorFactory.query({TableName: "tableName"}));
 				it("should no iterate", async () => {
-					for (const item of iterator) {
+					for await (const item of iterator) {
 						expect.fail("should not iterate");
 					}
 				});
@@ -176,12 +177,12 @@ describe("Having a iterator document client", () => {
 		});
 		describe("and asking for count by query", () => {
 			let countResult: number;
-			beforeEach(async () => countResult = await iteratorDocumentClient.countQuery({TableName: "tableName"}));
+			beforeEach(async () => countResult = await dynamoIteratorFactory.query({TableName: "tableName"}).count());
 			it("should return document client items amount", () => expect(countResult).to.be.eq(5));
 		});
 		describe("and asking for count by scan", () => {
 			let countResult: number;
-			beforeEach(async () => countResult = await iteratorDocumentClient.countScan({TableName: "tableName"}));
+			beforeEach(async () => countResult = await dynamoIteratorFactory.scan({TableName: "tableName"}).count());
 			it("should return document client items amount", () => expect(countResult).to.be.eq(5));
 		});
 		describe("and last items batch is empty", () => {
@@ -192,7 +193,7 @@ describe("Having a iterator document client", () => {
 			));
 			describe("and asking to scan", () => {
 				let iterator: ScanIterator;
-				beforeEach(async () => iterator = await iteratorDocumentClient.scan({TableName: "tableName"}));
+				beforeEach(async () => iterator = dynamoIteratorFactory.scan({TableName: "tableName"}));
 				describe("and iterating the response", () => {
 					let items: DocumentClient.AttributeMap[] = [];
 					beforeEach(async () => {
@@ -218,7 +219,7 @@ describe("Having a iterator document client", () => {
 			]);
 			describe("and asking to scan", () => {
 				let iterator: ScanIterator;
-				beforeEach(async () => iterator = await iteratorDocumentClient.scan({TableName: "tableName"}));
+				beforeEach(async () => iterator = dynamoIteratorFactory.scan({TableName: "tableName"}));
 				describe("and iterating the response", () => {
 					let items: DocumentClient.AttributeMap[] = [];
 					beforeEach(async () => {

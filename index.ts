@@ -1,3 +1,7 @@
-import DynamoIterator from "./dynamo-iterator.class";
+import DynamoIteratorFactory from "./dynamo-iterator.factory";
 
-export default DynamoIterator;
+export {
+	DynamoIteratorFactory,
+};
+
+export default DynamoIteratorFactory;

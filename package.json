@@ -11,7 +11,8 @@
     "test": "mocha",
     "test:coverage": "nyc mocha",
     "build": "tsc",
-    "check:style": "tslint -p .",
+    "style:check": "tslint -p .",
+    "style:fix": "tslint -p . --fix",
     "preversion": "yarn build && yarn test:coverage"
   },
   "devDependencies": {

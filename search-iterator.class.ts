@@ -14,40 +14,33 @@ interface IOutput {
 export default abstract class <Input> {
 
 	private batch: DocumentClient.AttributeMap[] = [];
-
+	private loadingBatch = false;
 	private sourceIsEmpty = false;
 	private lastEvaluatedKey: DocumentClient.Key;
-	private processing: boolean = false;
-	private nextItem: DocumentClient.AttributeMap;
 
 	protected constructor(
 		protected input: Input & IInput,
 	) {}
 
-	public [Symbol.iterator]() {
+	public [Symbol.asyncIterator]() {
 		return this;
 	}
 
-	public async preload() {
-		this.processing = true;
-		await this.fillBatch();
-		this.nextItem = this.batch.shift();
-		this.processing = false;
-	}
-
-	public next() {
-		if (this.processing) {
-			throw new Error("processing");
+	public async next(): Promise<{done: boolean, value: DynamoDB.DocumentClient.AttributeMap}> {
+		if (this.batch.length === 0 && !this.sourceIsEmpty) {
+			if (this.loadingBatch) {
+				throw new Error('Loading batch');
+			}
+			this.loadingBatch = true;
+			await this.fillBatch();
+			this.loadingBatch = false;
 		}
-		this.processing = true;
-		if (this.isDone()) {
-			this.processing = false;
-			return {done: true, value: null};
+		const item = this.batch.shift();
+		if (item === undefined) {
+			return {done: true, value: undefined};
 		}
-		const nextPromise = this.nextAsync();
-		nextPromise.then(() => this.processing = false);
 
-		return {done: false, value: nextPromise};
+		return {done: false, value: item};
 	}
 
 	public async count() {
@@ -69,8 +62,8 @@ export default abstract class <Input> {
 
 	public async toArray() {
 		const result: DocumentClient.AttributeMap[] = [];
-		for (const nextPromise of this) {
-			result.push(await nextPromise);
+		for await (const next of this) {
+			result.push(next);
 		}
 
 		return result;
@@ -78,8 +71,8 @@ export default abstract class <Input> {
 
 	public async slice(amount: number) {
 		const result: DocumentClient.AttributeMap[] = [];
-		for (const nextPromise of this) {
-			result.push(await nextPromise);
+		for await (const next of this) {
+			result.push(next);
 			if (result.length === amount) {
 				break;
 			}
@@ -90,24 +83,12 @@ export default abstract class <Input> {
 
 	protected abstract asyncSearch(input: Input): Promise<IOutput>;
 
-	private async nextAsync() {
-		await this.fillBatch();
-		const currentItem = this.nextItem;
-		this.nextItem = this.batch.shift();
-
-		return currentItem;
-	}
-
 	private async fillBatch() {
 		while (this.batch.length === 0 && this.sourceIsEmpty === false) {
 			const dynamoResponse = await this.getNextBlock();
 			this.batch = dynamoResponse.Items;
 			this.sourceIsEmpty = dynamoResponse.LastEvaluatedKey === undefined;
 		}
-	}
-
-	private isDone() {
-		return this.sourceIsEmpty && this.nextItem === undefined;
 	}
 
 	private async getNextBlock() {
