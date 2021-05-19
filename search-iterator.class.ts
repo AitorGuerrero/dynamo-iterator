@@ -43,6 +43,9 @@ export default abstract class <Input> {
 		return {done: false, value: item};
 	}
 
+	/**
+	 * @return {Promise<number>}
+	 */
 	public async count() {
 		const documentClientInput = Object.assign(
 			{},
@@ -60,6 +63,9 @@ export default abstract class <Input> {
 		return total;
 	}
 
+	/**
+	 * @return {Promise<DocumentClient.AttributeMap[]>}
+	 */
 	public async toArray() {
 		const result: DocumentClient.AttributeMap[] = [];
 		for await (const next of this) {
@@ -69,6 +75,9 @@ export default abstract class <Input> {
 		return result;
 	}
 
+	/**
+	 * @return {Promise<DocumentClient.AttributeMap[]>}
+	 */
 	public async slice(amount: number) {
 		const result: DocumentClient.AttributeMap[] = [];
 		for await (const next of this) {
