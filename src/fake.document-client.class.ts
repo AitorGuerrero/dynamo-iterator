@@ -28,12 +28,6 @@ export default class {
         const lastIndex = firstIndex + this.batchesSize;
         const batch = this.list.slice(firstIndex, lastIndex).filter((i) => i.matches !== false).map((i) => i.value);
         const lastEvaluatedKey = lastIndex >= this.list.length ? undefined : this.list[lastIndex - 1].value;
-        if (i.Select && i.Select === 'COUNT') {
-            return {
-                Count: batch.length,
-                LastEvaluatedKey: lastEvaluatedKey,
-            };
-        }
 
         return {
             Items: batch,

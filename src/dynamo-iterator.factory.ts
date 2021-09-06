@@ -1,6 +1,4 @@
 import {DynamoDB} from "aws-sdk";
-import QueryIterator from "./query-iterator.class";
-import ScanIterator from "./scan-iterator.class";
 import DocumentClient = DynamoDB.DocumentClient;
 
 export default class {
@@ -14,17 +12,35 @@ export default class {
 
 	/**
 	 * @param {DocumentClient.ScanInput} input
-	 * @return {ScanIterator}
+	 * @return {AsyncGenerator<DynamoDB.DocumentClient.AttributeMap>}
 	 */
-	public scan(input: DocumentClient.ScanInput) {
-		return new ScanIterator(this.documentClient, input);
+	public async* scan(input: DocumentClient.ScanInput): AsyncGenerator<DynamoDB.DocumentClient.AttributeMap> {
+		let response: DynamoDB.DocumentClient.ScanOutput;
+		do {
+			response = await this.documentClient.scan(Object.assign(
+				input,
+				{ExclusiveStartKey: response?.LastEvaluatedKey},
+			)).promise();
+			for (const item of response.Items) {
+				yield item;
+			}
+		} while(response.LastEvaluatedKey !== undefined)
 	}
 
 	/**
 	 * @param {DocumentClient.QueryInput} input
-	 * @return {QueryIterator}
+	 * @return {AsyncGenerator<DynamoDB.DocumentClient.AttributeMap>}
 	 */
-	public query(input: DocumentClient.QueryInput) {
-		return new QueryIterator(this.documentClient, input);
+	public async* query(input: DocumentClient.QueryInput): AsyncGenerator<DynamoDB.DocumentClient.AttributeMap> {
+		let response: DynamoDB.DocumentClient.QueryOutput;
+		do {
+			response = await this.documentClient.query(Object.assign(
+				input,
+				{ExclusiveStartKey: response?.LastEvaluatedKey},
+			)).promise();
+			for (const item of response.Items) {
+				yield item;
+			}
+		} while(response.LastEvaluatedKey !== undefined)
 	}
 }
