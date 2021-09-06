@@ -1,6 +1,6 @@
 {
   "name": "dynamo-iterator",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Iterator pattern applied to AWS Dynamo searches",
   "main": "src/index.js",
   "repository": "git@github.com:AitorGuerrero/dynamo-iterator.git",
@@ -10,13 +10,11 @@
   "scripts": {
     "test": "mocha --reporter=dot --forbid-only --forbid-pending",
     "test:coverage": "nyc --reporter=text-summary mocha --reporter=dot --forbid-only --forbid-pending",
-    "build": "tsc --build",
-    "build:clean": "tsc --build --clean",
     "build:check": "tsc --noEmit",
     "style:check": "eslint .",
     "style:fix": "eslint . --fix",
-    "preversion": "yarn build",
-    "postversion": "yarn build:clean",
+    "preversion": "tsc --build",
+    "postversion": "tsc --build --clean",
     "prepare": "husky install"
   },
   "devDependencies": {
