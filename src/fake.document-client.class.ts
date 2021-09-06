@@ -11,15 +11,15 @@ export default class {
     public batchesSize = 2;
     public list: Array<{matches?: boolean, value: DocumentClient.AttributeMap}> = [];
 
-    public scan(i: DocumentClient.ScanInput) {
+    public scan(i: DocumentClient.ScanInput): {promise(): Promise<DynamoDB.DocumentClient.ScanOutput>} {
         return {
-            promise: async () => this.getNexResponse(i),
+            promise: () => new Promise((rs) => rs(this.getNexResponse(i))),
         };
     }
 
-    public query(i: DocumentClient.QueryInput) {
+    public query(i: DocumentClient.QueryInput): {promise(): Promise<DynamoDB.DocumentClient.QueryOutput>} {
         return {
-            promise: async () => this.getNexResponse(i),
+            promise: () => new Promise((rs) => rs(this.getNexResponse(i)))
         };
     }
 

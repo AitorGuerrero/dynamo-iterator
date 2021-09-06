@@ -77,8 +77,7 @@ describe("Having a iterator document client", () => {
 				let items: DocumentClient.AttributeMap[] = [];
 				beforeEach(async () => {
 					items = [];
-					let item: DocumentClient.AttributeMap;
-					while (item = (await generator.next()).value) {
+					for await (const item of generator) {
 						items.push(item);
 					}
 				});
@@ -110,6 +109,7 @@ describe("Having a iterator document client", () => {
 				let generator: AsyncGenerator<DynamoDB.DocumentClient.AttributeMap>;
 				beforeEach(() => generator = dynamoGeneratorFactory.query({TableName: "tableName"}));
 				it("should no iterate", async () => {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					for await (const item of generator) {
 						expect.fail("should not iterate");
 					}
