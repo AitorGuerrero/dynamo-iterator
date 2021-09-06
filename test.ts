@@ -3,10 +3,10 @@ import {DynamoDB} from "aws-sdk";
 import {DocumentClient} from "aws-sdk/clients/dynamodb";
 import {expect} from "chai";
 import {beforeEach, describe, it} from "mocha";
-import DynamoIteratorFactory from "./dynamo-iterator.factory";
-import FakeDocumentClient from "./fake.document-client.class";
-import QueryIterator from "./query-iterator.class";
-import ScanIterator from "./scan-iterator.class";
+import DynamoIteratorFactory from "./src/dynamo-iterator.factory";
+import FakeDocumentClient from "./src/fake.document-client.class";
+import QueryIterator from "./src/query-iterator.class";
+import ScanIterator from "./src/scan-iterator.class";
 
 describe("Having a iterator document client", () => {
 

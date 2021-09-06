@@ -3,5 +3,5 @@
 
 yarn install
 tslint -p .
-tsc
-nyc mocha
+yarn build:check
+yarn nyc --reporter=text-summary mocha --reporter=dot --forbid-only --forbid-pending
