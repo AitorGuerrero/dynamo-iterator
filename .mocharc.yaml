@@ -3,4 +3,4 @@ require:
   - source-map-support/register
 recursive: true
 spec:
-  - test.ts
+  - src/**/*.test.ts

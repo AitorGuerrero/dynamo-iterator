@@ -6,6 +6,9 @@
         "noImplicitThis": true,
         "noImplicitReturns": false,
         "declaration": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "lib": [
+            "es2018.asynciterable"
+        ]
     }
 }

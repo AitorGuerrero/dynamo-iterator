@@ -2,6 +2,6 @@
 . "$(dirname "$0")/_/husky.sh"
 
 yarn install
-tslint -p .
+yarn style:check
 yarn build:check
 yarn nyc --reporter=text-summary mocha --reporter=dot --forbid-only --forbid-pending
